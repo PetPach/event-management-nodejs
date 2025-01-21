@@ -1,0 +1,51 @@
+# Dependencias de node
+node_modules/
+
+# Variables de entorno
+.env
+
+# Log de depuración
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Log de PM2
+pids
+*.pid
+*.seed
+
+# Logs
+logs
+*.log
+log/
+
+# Directorios de almacenamiento temporal
+tmp/
+temp/
+
+# Configuración del entorno local
+.DS_Store
+.env.local
+.env.*.local
+
+# Directorios de salida de build
+dist/
+build/
+
+# Archivos de test
+*.test.js
+*.spec.js
+
+# Archivos de configuración de IDE
+.idea/
+.vscode/
+*.swp
+
+# Otros
+coverage/
+.cache/
+
+# Ignorar cualquier archivo de backup o temporal del sistema operativo
+*.bak
+*.tmp
+*~

@@ -69,6 +69,63 @@ Se asume que las tablas de DynamoDB se encuentran creadas:
 
 Con esto, Node.js y npm quedan listos para desplegar el proyecto.
 
+### 2.4. Crear tablas en DynamoDB
+
+1. Tabla `Users`
+
+    ```
+    aws dynamodb create-table \
+    --table-name Users \
+    --attribute-definitions \
+        AttributeName=userId,AttributeType=S \
+        AttributeName=email,AttributeType=S \
+    --key-schema \
+        AttributeName=userId,KeyType=HASH \
+    --billing-mode PAY_PER_REQUEST \
+    --global-secondary-indexes \
+    '[
+        {
+        "IndexName": "EmailIndex",
+        "KeySchema": [
+            {"AttributeName":"email","KeyType":"HASH"}
+        ],
+        "Projection": {
+            "ProjectionType":"ALL"
+        }
+        }
+    ]'
+    ```
+
+2. Tabla `Events`
+
+    ```
+    aws dynamodb create-table \
+    --table-name Events \
+    --attribute-definitions AttributeName=eventId,AttributeType=S \
+    --key-schema AttributeName=eventId,KeyType=HASH \
+    --billing-mode PAY_PER_REQUEST
+    ```
+
+3. Tabla `Registrations`
+
+```
+aws dynamodb create-table \
+  --table-name Registrations \
+  --attribute-definitions AttributeName=registrationId,AttributeType=S \
+  --key-schema AttributeName=registrationId,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST
+```
+
+4. Tabla `Notifications`
+
+    ```
+    aws dynamodb create-table \
+    --table-name Notifications \
+    --attribute-definitions AttributeName=notificationId,AttributeType=S \
+    --key-schema AttributeName=notificationId,KeyType=HASH \
+    --billing-mode PAY_PER_REQUEST
+    ```
+
 ---
 
 ## 3. Estructura de Archivos
@@ -242,7 +299,6 @@ Tras seguir estos pasos:
 6. Aseguraste la persistencia de la aplicación mediante **PM2**.  
 
 Con ello, tu **API de gestión de eventos** queda desplegada en EC2, lista para producción o para la presentación del laboratorio. ¡Éxito con tu proyecto!
-```
 
 ---
 
@@ -252,4 +308,3 @@ Con ello, tu **API de gestión de eventos** queda desplegada en EC2, lista para 
 - Si en algún momento deseas **SSL** o un **dominio personalizado**, podrías agregar **Nginx** o un **Load Balancer** para manejar certificados TLS.  
 - Para un sistema de mensajería más avanzado, podrías integrar **Amazon SES** para el envío de correos o **Amazon SNS** para notificaciones push.  
 
-Con este **README.md** tendrás una **referencia** rápida de los pasos clave de tu proyecto, tanto para la configuración de red e instancia EC2, como para la instalación y persistencia de tu aplicación en producción usando PM2.

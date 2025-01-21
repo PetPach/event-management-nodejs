@@ -2,10 +2,10 @@ const { matchedData } = require('express-validator');
 const { v4: uuidv4 } = require('uuid');
 const {
   createEvent,
+  getAllEvents,
   getEventById,
   updateEvent,
   deleteEvent,
-  getAllEvents,
 } = require('../models/eventModel');
 
 /**
@@ -14,23 +14,20 @@ const {
 const createNewEvent = async (req, res) => {
   try {
     const eventData = matchedData(req);
-    const eventId = uuidv4();
-    // Agregamos el userId del organizador y la fecha actual:
-    eventData.eventId = eventId;
-    eventData.organizerId = req.user.id;
+    eventData.eventId = uuidv4(); // Generar ID único con uuid
+    eventData.organizer = req.user.id; // el usuario que crea el evento
     eventData.createdAt = new Date().toISOString();
+    eventData.updatedAt = new Date().toISOString();
 
     const newEvent = await createEvent(eventData);
-
-    res.status(201).json({
-      msg: 'Evento creado exitosamente',
-      event: newEvent
-    });
+    return res
+      .status(201)
+      .json({ msg: 'Evento creado exitosamente', event: newEvent });
   } catch (error) {
     console.error('Error creando evento:', error);
-    res.status(500).json({
-      msg: 'Error en el servidor, intente nuevamente más tarde.'
-    });
+    return res
+      .status(500)
+      .json({ msg: 'Error en el servidor, intente nuevamente más tarde.' });
   }
 };
 
@@ -43,9 +40,9 @@ const getAll = async (req, res) => {
     res.json(events);
   } catch (error) {
     console.error('Error obteniendo eventos:', error);
-    res.status(500).json({
-      msg: 'Error en el servidor, intente nuevamente más tarde.'
-    });
+    res
+      .status(500)
+      .json({ msg: 'Error en el servidor, intente nuevamente más tarde.' });
   }
 };
 
@@ -54,6 +51,7 @@ const getAll = async (req, res) => {
  */
 const getById = async (req, res) => {
   try {
+    // Usar matchedData si usas express-validator
     const { id } = matchedData(req);
     const event = await getEventById(id);
     if (!event) {
@@ -62,9 +60,9 @@ const getById = async (req, res) => {
     res.json(event);
   } catch (error) {
     console.error('Error obteniendo evento:', error);
-    res.status(500).json({
-      msg: 'Error en el servidor, intente nuevamente más tarde.'
-    });
+    res
+      .status(500)
+      .json({ msg: 'Error en el servidor, intente nuevamente más tarde.' });
   }
 };
 
@@ -73,26 +71,32 @@ const getById = async (req, res) => {
  */
 const updateOneEvent = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; // o matchedData(req)
     const eventData = matchedData(req);
 
-    // Verificar que exista
+    // Verificar si existe
     let event = await getEventById(id);
     if (!event) {
       return res.status(404).json({ msg: 'Evento no encontrado' });
     }
 
-    // Verificar permisos
-    if (event.organizerId !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ msg: 'No tiene permisos para actualizar este evento' });
+    // Verificar permisos, p.ej. organizer o admin
+    if (event.organizer !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({
+        msg: 'No tiene permisos para actualizar este evento',
+      });
     }
 
     // Actualizar
-    const updated = await updateEvent(id, eventData);
-    res.json({ msg: 'Evento actualizado', event: updated });
+    eventData.updatedAt = new Date().toISOString();
+    const updatedEvent = await updateEvent(id, eventData);
+
+    res.json({ msg: 'Evento actualizado', event: updatedEvent });
   } catch (error) {
     console.error('Error actualizando evento:', error);
-    res.status(500).json({ msg: 'Error en el servidor, intente nuevamente más tarde.' });
+    res
+      .status(500)
+      .json({ msg: 'Error en el servidor, intente nuevamente más tarde.' });
   }
 };
 
@@ -109,15 +113,19 @@ const deleteOneEvent = async (req, res) => {
     }
 
     // Verificar permisos
-    if (event.organizerId !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ msg: 'No tiene permisos para eliminar este evento' });
+    if (event.organizer !== req.user.id && req.user.role !== 'admin') {
+      return res
+        .status(403)
+        .json({ msg: 'No tiene permisos para eliminar este evento' });
     }
 
     await deleteEvent(id);
     res.json({ msg: 'Evento eliminado exitosamente' });
   } catch (error) {
     console.error('Error eliminando evento:', error);
-    res.status(500).json({ msg: 'Error en el servidor, intente nuevamente más tarde.' });
+    res
+      .status(500)
+      .json({ msg: 'Error en el servidor, intente nuevamente más tarde.' });
   }
 };
 

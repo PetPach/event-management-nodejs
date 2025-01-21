@@ -19,7 +19,7 @@ const validateUpdateEvent = [
 ];
 
 const validateEventId = [
-    check('id').isMongoId().withMessage('ID de evento inválido')
+    param('id').isUUID().withMessage('ID de evento inválido'),
 ];
 
 module.exports = { validateCreateEvent, validateUpdateEvent, validateEventId };

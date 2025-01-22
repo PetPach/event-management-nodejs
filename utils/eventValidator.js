@@ -1,4 +1,4 @@
-const { check } = require("express-validator");
+const { check, param } = require("express-validator");
 
 const validateCreateEvent = [
     check('title').exists().notEmpty().withMessage('El título es requerido'),
